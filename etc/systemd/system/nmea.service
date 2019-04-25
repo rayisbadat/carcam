@@ -1,0 +1,10 @@
+[Unit]
+Description=Simple NMEA logger
+
+[Service]
+ExecStart=/home/pi/carcam/scripts/nmea5.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,10 @@
+[Unit]
+Description=Simple NMEA logger
+
+[Service]
+ExecStart=/home/pi/carcam/scripts/camera4.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,2 +1,6 @@
 nmea/*
 video/*
+*.vtt
+*.mkv
+*.ts
+*.m3u8

@@ -1,0 +1,8 @@
+1xRaspberry Pi Zero W
+1xGPS Header
+Solder
+24 AWG wire
+1x Pi Camera with IR sensor/leds
+1x Passive Antenna (I dont know if this actually helps, but it feels like it)
+1x 3d Printed case
+1x Charging Cable
