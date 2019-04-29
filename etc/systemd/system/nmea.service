@@ -2,7 +2,7 @@
 Description=Simple NMEA logger
 
 [Service]
-ExecStart=/home/pi/carcam/scripts/nmea5.sh
+ExecStart=/home/pi/carcam/scripts/nmea.sh
 Restart=always
 
 [Install]

@@ -2,7 +2,7 @@
 Description=Simple NMEA logger
 
 [Service]
-ExecStart=/home/pi/carcam/scripts/camera4.sh
+ExecStart=/home/pi/carcam/scripts/camera.sh
 Restart=always
 
 [Install]
