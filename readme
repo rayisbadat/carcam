@@ -1,0 +1,51 @@
+Per request of a cool frood, here is my brain dumb of this project.
+
+    The carcam started off as a solar powered squierrel camera.  However the
+adafruit components I bought only outputed 2.2-2.7V and wasnt enough to power
+the camera.  As long as I had all the parts, i decided to make a dashcam.
+
+    First probelm i had.  I think i blew out my GPS MCU when soldiering it.  It
+was my first soldiering job in  a loooooong time.  I ended up buying new equipment
+and setting up my dedicated work table again.  After replacing the MCU I got better
+results.
+
+    With the GPS MCU, it takes like 20 minutes for it to get initial sync.  You
+need a good line of sight to the sky, or your just beating your head against the
+wall.   After that, syncs are pretty fast.  One thing that ancedotally helped 
+was the 40dB passive antenna.  Even though the vendor's site says you need an
+active antennae.
+
+    I screwed up and didnt realize the PPS line had to be soldiered to a GPIO
+header on the board, and the raspbian boot config set as the clk pin.
+
+    NTP config was suprsingly hard to get a clear cut answer on how to setup.
+Eventually google found me someones random blog post.  However the PI is terrible
+at maintaining clock sync.  I dont think it has a bios battery, so powered off
+it comes up drastically wrong.   This requireed me to put a while loop in my 
+scripts that checks until skew is less then some arbitrary amount (5 seconds?).
+Then the scripts will continue on.  Otherwise iwas getting wierd effects. Especially
+when I was trying to get the subtitles to render live.  Imagine the click jumping
+backward and forward in time a full day, when the video itself is  only a minute
+long.
+
+    Video/Subtitle nightmare.  So initially i just used the ffmpeg ability to point
+at a single txt file, and every frame it re-reaads it.  And hard subs it in.  this
+is exactly what i wanted.  You can box, and resize, and do positioning.... The 
+Pi Zero is to weak.  FFmpeg transcoding the video at like 0.2x.  Longer it runs
+worse it gets.
+
+    Switched over to softsubs.  All my attemtps to updatethe subtitles alongside
+the video streaming ended in bizzare behaviour.  For most part, first video segment
+would work  for 7-10 seconds, and everything after that would be blank.  Even
+if you `ffmpeg -i video.mkv subitle.srt/vtt`, it ends up being empty.  I think
+ffmpeg reads the subtitle file once at some random point per segment, and thats it.
+Whcih is wierd, since it doesnt wirte out the subtitles to the container to the end.
+Well atleast for matroska, because if u ctrl+c the process before then, vlc complains
+saying the subtitle stream is unrecongizable or corrupt.
+
+    So in the end, i generate the subtitel file in parrallel with the saving the video,
+in 60s chunks.  Then after the raspivid exits, we delete a lock file, signaling to start
+generating a new nmea/subtitle file.  While background stream coping the video segment
+and its subtitle files.  My inital tests show the skew is <2 seconds. which is 
+fine for my shits and giggles.
+
