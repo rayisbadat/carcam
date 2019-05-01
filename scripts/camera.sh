@@ -2,16 +2,22 @@
 
 set -e
 set -u
-set -x
+
+while [ $(ntpq -p| grep GPS  | tr -s " " | cut -d" " -f9 | cut -f2 -d"-" | cut -f1 -d"." ) -gt 5 ]
+do
+  sleep 1
+done
+
 
 DURATION=60 #segment length in seconds
 NMEA_ROOT='/home/pi/carcam/nmea'
 
 VIDEO_BASE="/home/pi/carcam/video"
 DATE="$(date +%F)"
+DATETIME=$(date +"%Y-%m-%d_%H:%M:%S")
 TS="$(date +%s)"
 
-video_segment="${VIDEO_BASE}/${DATE}-${TS}"
+video_segment="${VIDEO_BASE}/${DATETIME}-${TS}"
 [ -d $video_segment ] || mkdir -p $video_segment
 
 LOOP_CNT=0
@@ -79,7 +85,7 @@ done
 
 MERGE_SUBS_AND_VID() {
 
-ffmpeg -y
+ffmpeg -y -loglevel verbose \
     -fflags +genpts \
     -i $RAW_VIDEO \
     -i $SUBTITLE.srt \
@@ -89,7 +95,6 @@ ffmpeg -y
     -c:s copy -metadata:s:s:0 language=eng -metadata:s:s:1 language=ipk \
     ${video_segment}/${DATE}-${TS}.${LOOP_CNT}.mkv &
 
-#    -loglevel verbose \
 #    -map 0 -map 1 -map 2 \
 #    -i $SUBTITLE.srt \
 #    -c:s copy -metadata:s:s:0 language=eng -metadata:s:s:1 language=ipk \
