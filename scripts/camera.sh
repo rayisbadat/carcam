@@ -13,12 +13,12 @@ DURATION=60 #segment length in seconds
 NMEA_ROOT='/home/pi/carcam/nmea'
 
 VIDEO_BASE="/home/pi/carcam/video"
-DATE="$(date +%F)"
-DATETIME=$(date +"%Y-%m-%d_%H:%M:%S")
 TS="$(date +%s)"
+DATE="$(date -d@"$TS" +%F)"
+DATETIME=$(date -d@"$TS" +"%Y-%m-%d_%H:%M:%S")
 
-video_segment="${VIDEO_BASE}/${DATETIME}-${TS}"
-[ -d $video_segment ] || mkdir -p $video_segment
+
+video_segment="${VIDEO_BASE}/${DATE}"
 
 LOOP_CNT=0
 
@@ -85,6 +85,7 @@ done
 
 MERGE_SUBS_AND_VID() {
 
+[ -d $video_segment ] || mkdir -p $video_segment
 ffmpeg -y -loglevel verbose \
     -fflags +genpts \
     -i $RAW_VIDEO \
@@ -93,7 +94,7 @@ ffmpeg -y -loglevel verbose \
     -map 0 -map 1 -map 2 \
     -codec:v copy \
     -c:s copy -metadata:s:s:0 language=eng -metadata:s:s:1 language=ipk \
-    ${video_segment}/${DATE}-${TS}.${LOOP_CNT}.mkv &
+    ${video_segment}/${DATE}_Loop-${LOOP_CNT}_${timestamp}.mkv &
 
 #    -map 0 -map 1 -map 2 \
 #    -i $SUBTITLE.srt \
@@ -109,7 +110,7 @@ do
 	INIT_SUBTITLES
 	GPS_SUBTITLES &
 	
-	raspivid -n -w 720 -h 405 -fps 25 -vf -t $(( DURATION * 1000 )) -b 1800000 -ih -o $RAW_VIDEO;
+	raspivid -n -w 720 -h 405 -fps 25  -t $(( DURATION * 1000 )) -b 1800000 -ih -o $RAW_VIDEO  ;
 	rm $GPS_LOOP
 
 	MERGE_SUBS_AND_VID &
