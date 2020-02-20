@@ -21,6 +21,7 @@ DATETIME=$(date -d@"$TS" +"%Y-%m-%d_%H:%M:%S")
 video_segment="${VIDEO_BASE}/${DATE}"
 
 LOOP_CNT=0
+PADED_LOOP_CNT=00000
 
 INIT_SUBTITLES() {
 SUBTITLE=$( mktemp )
@@ -66,7 +67,8 @@ do
           current_vtt_timestamp_min="$( printf "%02d" $(( current_vtt_timestamp_min + 1 )) )"
         fi
 
-        gpspipe -w -n 10 |   grep -m 1 lon  > $GPS_OUT
+        #gpspipe -w -n 10 |   grep -m 1 lon  > $GPS_OUT
+        gpspipe -w -n 10 |   grep -m 1 lon | jq '.' | grep -vE 'class|device|mode' > $GPS_OUT
 
         #Classic SRT subtitles
         echo "$count" >> $SUBTITLE.srt
@@ -85,6 +87,7 @@ done
 
 MERGE_SUBS_AND_VID() {
 
+PADDED_LOOP_CNT=$(printf "%05d" $LOOP_CNT)
 [ -d $video_segment ] || mkdir -p $video_segment
 ffmpeg -y -loglevel verbose \
     -fflags +genpts \
@@ -94,7 +97,7 @@ ffmpeg -y -loglevel verbose \
     -map 0 -map 1 -map 2 \
     -codec:v copy \
     -c:s copy -metadata:s:s:0 language=eng -metadata:s:s:1 language=ipk \
-    ${video_segment}/${DATE}_Loop-${LOOP_CNT}_${timestamp}.mkv &
+    ${video_segment}/${DATE}_Loop-${PADED_LOOP_CNT}_${timestamp}.mkv &
 
 #    -map 0 -map 1 -map 2 \
 #    -i $SUBTITLE.srt \
